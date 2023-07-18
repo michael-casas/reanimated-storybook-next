@@ -33,7 +33,9 @@
     "@storybook/addon-ondevice-controls": "*",
     "@storybook/addon-ondevice-notes": "*",
     "@react-native-async-storage/async-storage": "*",
-    "react-native-safe-area-context": "*"
+    "react-native-safe-area-context": "*",
+    "raf": "*",
+    "setimmediate": "*"
   },
   "devDependencies": {
     "@babel/plugin-proposal-export-namespace-from": "*",
