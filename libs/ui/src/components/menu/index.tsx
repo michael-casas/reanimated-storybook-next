@@ -1,108 +1,92 @@
-import React, { useState } from 'react';
-import { Pressable as NativeTouchable } from 'react-native';
-import { Svg, Rect as NativeRect } from 'react-native-svg';
+import React, { useEffect } from 'react';
+import { StyleSheet, View, Text } from 'react-native';
+import Constants from 'expo-constants';
+import { Svg, Circle } from 'react-native-svg';
 import Animated, {
+  useSharedValue,
   useAnimatedStyle,
   withTiming,
+  Easing,
+  useAnimatedProps,
 } from 'react-native-reanimated';
 
-const Touchable = Animated.createAnimatedComponent(NativeTouchable);
-const Rect = Animated.createAnimatedComponent(NativeRect);
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-type MenuProps = {
-  fill?: string;
-  stroke?: string;
-  size: number;
-  onPress?: () => void;
-} & React.ComponentProps<typeof Svg>;
+const circleRadius = 150; // Increased circle radius for better visibility
 
-export default function Menu({
-  fill,
-  stroke,
-  size,
-  onPress,
-  ...props
-}: MenuProps) {
-  const [toggled, setToggled] = useState(false);
-  const topStyle = useAnimatedStyle(() => {
+const AnimatedCircleComponent = () => {
+  const fill = useSharedValue('#fff');
+  const progress = useSharedValue(0);
+
+  const props = useAnimatedProps(() => {
+    return { fill: fill.value };
+  });
+
+  const style = useAnimatedStyle(() => {
+    const x = circleRadius * Math.cos(2 * Math.PI * progress.value);
+    const y = circleRadius * Math.sin(2 * Math.PI * progress.value);
+
     return {
-      transform: [
-        {
-          translateY: toggled
-            ? withTiming(20, {
-                duration: 750,
-              })
-            : withTiming(0, {
-                duration: 750,
-              }),
-        },
-      ],
+      transform: [{ translateX: x }, { translateY: y }],
     };
-  }, [toggled]);
-  const bottomStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateY: toggled
-            ? withTiming(-20, {
-                duration: 750,
-              })
-            : withTiming(0, {
-                duration: 750,
-              }),
-        },
-      ],
+  });
+
+  useEffect(() => {
+    progress.value = withTiming(
+      1,
+      {
+        duration: 2000,
+        easing: Easing.linear,
+      },
+      (isFinished) => {
+        if (isFinished) {
+          progress.value = 0;
+        }
+      }
+    );
+
+    const interval = setInterval(() => {
+      fill.value = withTiming(fill.value === '#fff' ? '#000' : '#fff', {
+        duration: 1000,
+      });
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
     };
-  }, [toggled]);
+  }, []);
 
   return (
-    <Touchable
-      onPress={() => {
-        if (onPress) onPress();
-        setToggled(!toggled);
-        console.log('Menu pressed! \nState: ', toggled);
-      }}
-      style={{
-        borderRadius: 5,
-      }}
-    >
-      <Svg
-        width={size}
-        height={size}
-        viewBox="0 0 100 100"
-        fill="none"
-        {...props}
-      >
-        <Rect
-          style={[topStyle]}
-          fill={fill}
-          stroke={stroke}
-          width={80}
-          height={10}
-          rx={5}
-          x={10}
-          y={25}
-        />
-        <Rect
-          fill={fill}
-          stroke={stroke}
-          width={80}
-          height={10}
-          rx={5}
-          x={10}
-          y={45}
-        />
-        <Rect
-          style={[bottomStyle]}
-          fill={fill}
-          stroke={stroke}
-          width={80}
-          height={10}
-          rx={5}
-          x={10}
-          y={65}
-        />
+    <Animated.View style={style}>
+      <Svg width="100px" height="100px">
+        <AnimatedCircle cx="50%" cy="50%" r="50" animatedProps={props} />
       </Svg>
-    </Touchable>
+    </Animated.View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    height: window.innerHeight,
+    width: window.innerWidth,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: Constants.statusBarHeight,
+    backgroundColor: 'red',
+    padding: 8,
+  },
+  paragraph: {
+    margin: 24,
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+});
+
+export default function Menu() {
+  return (
+    <View style={styles.container}>
+      <AnimatedCircleComponent />
+    </View>
   );
 }
