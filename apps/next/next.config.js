@@ -4,15 +4,19 @@
 const { composePlugins, withNx } = require('@nx/next');
 const { withExpo } = require('@expo/next-adapter');
 const path = require('node:path');
+const withTM = require('next-transpile-modules')(['react-native-svg']);
+
 
 /**
  * @type {import('@nx/next/plugins/with-nx').WithNxOptions}
  **/
-const nextConfig = {
+module.exports = withTM({
+  // Your Next.js config
+
   nx: {
     // Set this to true if you would like to use SVGR
     // See: https://github.com/gregberge/svgr
-    svgr: true,
+    svgr: false,
   },
   reactStrictMode: false,
   transpilePackages: [
@@ -31,7 +35,7 @@ const nextConfig = {
     ],
   },
   // eslint-disable-next-line no-empty-pattern
-  webpack: (config, {}) => {
+  webpack: (config, options) => {
     config.module.rules.push({
       test: /\.(png|woff|woff2|eot|ttf|svg)$/,
       type: 'asset/resource',
@@ -56,9 +60,10 @@ const nextConfig = {
       '.web.tsx',
       ...config.resolve.extensions,
     ];
+    config.resolve.alias['react-native-svg'] = 'react-native-svg/src'
     return config;
   },
-};
+});
 
 const plugins = [
   // Add more Next.js plugins to this list if needed.
