@@ -8,6 +8,8 @@ To start the development server on web `nx run ui:storybook`. Open your browser 
 
 To start the development server on mobile `nx run ui:storybook-native`.
 
+To start the next site `nx run next:serve:development`.
+
 ## The Issue
 
 Currently, react-native-reanimated is not processing Animated styles on web.
